@@ -58,6 +58,11 @@ router.get('/active', verify, async (req, res)=>{
   }
   try {
     const activeLoad = await Load.findOne({assigned_to: currUser._id});
+    if(!activeLoad8){
+         return res.status(400).send({
+              'message': 'this driver dont have any active loads',
+            })
+    }
     return res.status(200).send({
       'load': activeLoad,
     });
@@ -120,7 +125,6 @@ router.post('/:id/post', verify, async (req, res)=> {
       {status: 'IS'},
       {type: truckType},
     ]});
-
     if (availableDriver) {
       await Load.findOneAndUpdate({_id: req.params['id']}, {
         logs: {message: `Load is assigned to ${availableDriver._id}`},
@@ -128,6 +132,7 @@ router.post('/:id/post', verify, async (req, res)=> {
         state: 'En route to Pick Up',
         assigned_to: availableDriver.assigned_to,
       });
+
       await Truck.findOneAndUpdate({_id: availableDriver._id}, {
         status: 'OL',
       });
@@ -277,7 +282,7 @@ router.delete('/:id', verify, async (req, res)=>{
   }
   try {
     await Load.deleteOne({_id: req.params['id']});
-    return res.status(400).send({
+    return res.status(200).send({
       'message': 'Load deleted successfully',
     });
   } catch (err) {
@@ -354,3 +359,4 @@ router.get('/', verify, async (req, res) =>{
 });
 
 module.exports = router;
+
